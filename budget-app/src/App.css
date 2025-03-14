@@ -1,0 +1,31 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  background: #f5f6fa;
+  color: #333;
+}
+
+h1, h2, h3, h4 {
+  color: #2c3e50;
+}
+
+.primary-button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.primary-button:hover {
+  background: #357abd;
+}
+
+.error-message {
+  color: #ff4444;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #ffebee;
+  border-radius: 4px;
+}
