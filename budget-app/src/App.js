@@ -5,7 +5,6 @@ import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
 import ExpenseTracker from './components/ExpenseTracker';
 import BudgetGoals from './components/BudgetGoals';
-// import Reports from './components/Reports'; 
 import Debt from './components/Debt'; 
 import Profile from './components/Profile'; 
 import Overview from './components/Overview';
@@ -28,7 +27,6 @@ function App() {
             <Route path="overview" element={<Overview />} />
             <Route path="expenses" element={<ExpenseTracker />} />
             <Route path="budgets" element={<BudgetGoals />} />
-            {/* <Route path="reports" element={<Reports />} /> */}
             <Route path="debt" element={<Debt />} />
             <Route path="profile" element={<Profile />} />{/* Fixed route path to lowercase */}
           </Route>

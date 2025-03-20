@@ -366,3 +366,19 @@ button:active {
     grid-template-columns: 1fr;
   }
 }
+@media (max-width: 600px) {
+  .profile-page {
+    padding: 15px;
+  }
+
+  .avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    font-size: 1.8rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

@@ -43,14 +43,12 @@ export default function Overview() {
       }
     };
 
-    // Create date range for the selected month
     const startDate = `${selectedMonth}-01`;
     const year = parseInt(selectedMonth.split('-')[0]);
     const month = parseInt(selectedMonth.split('-')[1]);
     const lastDay = new Date(year, month, 0).getDate();
     const endDate = `${selectedMonth}-${lastDay}`;
 
-    // Fetch expenses
     const expensesCollection = collection(db, 'expenses');
     const qExpenses = query(expensesCollection, where('userId', '==', auth.currentUser.uid));
     const unsubscribeExpenses = onSnapshot(
@@ -69,7 +67,6 @@ export default function Overview() {
       }
     );
 
-    // Fetch income
     const incomeCollection = collection(db, 'income');
     const qIncome = query(incomeCollection, where('userId', '==', auth.currentUser.uid));
     const unsubscribeIncome = onSnapshot(
@@ -88,7 +85,6 @@ export default function Overview() {
       }
     );
 
-    // Fetch debts
     const qDebts = query(collection(db, 'debts'), where('userId', '==', auth.currentUser.uid));
     const unsubscribeDebts = onSnapshot(
       qDebts,
@@ -110,39 +106,30 @@ export default function Overview() {
     };
   }, [selectedMonth]);
 
-  // Wait for currency to load
   if (currencyLoading) {
     return <div>Loading currency...</div>;
   }
 
-  // Handle month selection
   const handleMonthChange = (e) => {
     setSelectedMonth(e.target.value);
   };
 
-  // Calculate totals
   const activeDebts = debts.filter((debt) => debt.status === 'active');
   const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
   const totalIncome = income.reduce((sum, inc) => sum + (inc.amount || 0), 0);
   const netSavings = totalIncome - totalExpenses;
   const totalDebt = activeDebts.reduce((sum, debt) => sum + (debt.currentBalance || 0), 0);
 
-  // Calculate upcoming debts
   const upcomingDebts = activeDebts.filter((debt) => {
     if (!debt.dueDate) return false;
-
     try {
       const dueDate = new Date(debt.dueDate);
       const today = new Date();
-
       if (isNaN(dueDate.getTime())) return false;
-
       today.setHours(0, 0, 0, 0);
       dueDate.setHours(0, 0, 0, 0);
-
       const diffTime = dueDate - today;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
       return diffDays <= 7 && diffDays >= 0;
     } catch (error) {
       console.error(`Error processing due date for debt ${debt.id}:`, error);
@@ -150,37 +137,28 @@ export default function Overview() {
     }
   });
 
-  // Prepare bar chart data
   const barData = {
     labels: ['Expenses', 'Income', 'Net Savings', 'Debt'],
     datasets: [
       {
-        label: `Amount (${currency})`, // Dynamic currency in label
+        label: `Amount (${currency})`,
         data: [totalExpenses, totalIncome, netSavings, totalDebt],
         backgroundColor: ['#FF6384', '#36A2EB', '#27ae60', '#FFCE56'],
       },
     ],
   };
 
-  // Chart options with dynamic currency formatting
   const chartOptions = {
     responsive: true,
     plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Financial Summary',
-      },
+      legend: { position: 'top' },
+      title: { display: true, text: 'Financial Summary' },
       tooltip: {
         callbacks: {
           label: function (context) {
             let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
-            }
-            label += formatCurrency(context.parsed.y, currency); // Dynamic currency in tooltips
+            if (label) label += ': ';
+            label += formatCurrency(context.parsed.y, currency);
             return label;
           },
         },
@@ -191,16 +169,15 @@ export default function Overview() {
         beginAtZero: true,
         ticks: {
           callback: function (value) {
-            return formatCurrency(value, currency); // Dynamic currency in y-axis
+            return formatCurrency(value, currency);
           },
         },
       },
     },
   };
 
-  // Predict future savings
   const predictFutureSavings = () => {
-    const months = 6; // Predict for the next 6 months
+    const months = 6;
     const averageSavings = netSavings;
     const futureSavings = [];
     const currentDate = new Date(selectedMonth);
@@ -214,7 +191,6 @@ export default function Overview() {
         cumulativeSavings: averageSavings * i,
       });
     }
-
     return futureSavings;
   };
 
@@ -270,60 +246,62 @@ export default function Overview() {
             </div>
           </div>
 
-          <div className="chart-due-dates-container">
-            <div className="chart-container">
-              <h2>Financial Summary</h2>
-              <Bar data={barData} options={chartOptions} />
-            </div>
-            <div className="upcoming-debts">
-              <h2>Upcoming Due Dates</h2>
-              {upcomingDebts.length > 0 ? (
-                <ul className="debts-list">
-                  {upcomingDebts.map((debt) => (
-                    <li key={debt.id} className="debt-item">
-                      <div className="debt-name">{debt.lenderName || 'Unknown Lender'}</div>
-                      <div className="debt-details">
-                        <span className="debt-date">
-                          Due on {new Date(debt.dueDate).toLocaleDateString()}
-                        </span>
-                        {debt.currentBalance && (
-                          <span className="debt-amount">
-                            {formatCurrency(debt.currentBalance, currency)}
+          <div className="financial-sections">
+            <div className="chart-due-dates-container">
+              <div className="chart-container">
+                <h2>Financial Summary</h2>
+                <Bar data={barData} options={chartOptions} />
+              </div>
+              <div className="upcoming-debts">
+                <h2>Upcoming Due Dates</h2>
+                {upcomingDebts.length > 0 ? (
+                  <ul className="debts-list">
+                    {upcomingDebts.map((debt) => (
+                      <li key={debt.id} className="debt-item">
+                        <div className="debt-name">{debt.lenderName || 'Unknown Lender'}</div>
+                        <div className="debt-details">
+                          <span className="debt-date">
+                            Due on {new Date(debt.dueDate).toLocaleDateString()}
                           </span>
-                        )}
-                      </div>
-                    </li>
+                          {debt.currentBalance && (
+                            <span className="debt-amount">
+                              {formatCurrency(debt.currentBalance, currency)}
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="no-debts-message">No upcoming due dates within the next 7 days.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="predictive-analysis">
+              <div className="projection-container">
+                <h2>Savings Projection</h2>
+                <p>Based on your current savings trend, here's a projection for the next 6 months:</p>
+                <div className="projection-grid">
+                  {futureSavings.map((fs, index) => (
+                    <div key={index} className="projection-card">
+                      <div className="projection-month">{fs.month}</div>
+                      <div className="projection-amount">{formatCurrency(fs.savings, currency)}</div>
+                      <div
+                        className={
+                          fs.savings >= 0 ? 'projection-indicator positive' : 'projection-indicator negative'
+                        }
+                      ></div>
+                    </div>
                   ))}
-                </ul>
-              ) : (
-                <p className="no-debts-message">No upcoming due dates within the next 7 days.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="predictive-analysis">
-            <h2>Savings Projection</h2>
-            <p>Based on your current savings trend, here's a projection for the next 6 months:</p>
-
-            <div className="projection-grid">
-              {futureSavings.map((fs, index) => (
-                <div key={index} className="projection-card">
-                  <div className="projection-month">{fs.month}</div>
-                  <div className="projection-amount">{formatCurrency(fs.savings, currency)}</div>
-                  <div
-                    className={
-                      fs.savings >= 0 ? 'projection-indicator positive' : 'projection-indicator negative'
-                    }
-                  ></div>
                 </div>
-              ))}
-            </div>
-
-            <div className="projection-note">
-              <p>
-                <strong>Note:</strong> This projection is based on your current month's savings pattern and assumes
-                consistent income and expenses in the future.
-              </p>
+                <div className="projection-note">
+                  <p>
+                    <strong>Note:</strong> This projection is based on your current month's savings pattern and assumes
+                    consistent income and expenses in the future.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </>

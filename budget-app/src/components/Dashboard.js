@@ -7,7 +7,7 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <Sidebar />
       <div className="main-content">
-        <Outlet /> {/* This renders the nested routes */}
+        <Outlet />
       </div>
     </div>
   );

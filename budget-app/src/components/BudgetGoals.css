@@ -222,7 +222,16 @@ progress.over-budget::-moz-progress-bar {
     font-size: 0.8rem;
   }
 }
+@media (max-width: 480px) {
+  .budget-form button {
+    padding: 0.6rem 1rem; /* Smaller for mobile */
+  }
 
+  .delete-button {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+}
 @media (max-width: 480px) {
   .budget-goals {
     padding: 1rem;

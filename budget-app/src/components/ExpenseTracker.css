@@ -312,7 +312,42 @@ body {
 .delete-confirm-button:hover {
   background: #e03e3e;
 }
+@media (max-width: 768px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
 
+  .expenses-panel, .income-panel {
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .expense-tracker-container {
+    padding: 10px;
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+  }
+
+  .expense-item, .income-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .add-button {
+    width: 100px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .modal-content {
+    max-width: 90%;
+    padding: 15px;
+  }
+}
 /* Responsive Layout */
 @media (max-width: 768px) {
   .dashboard-layout {

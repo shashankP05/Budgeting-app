@@ -518,6 +518,8 @@ button[type="submit"]:hover {
   max-width: 500px;
   width: 100%;
   position: relative;
+  max-height: 90vh; /* Added to limit height */
+  overflow-y: auto; /* Added to enable scrolling */
 }
 
 .modal-content h2 {
@@ -594,5 +596,36 @@ button[type="submit"]:hover {
   
   .debt-list {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .debt-summary {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .debt-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .debt-container {
+    padding: 10px;
+  }
+
+  .debt-item {
+    padding: 15px;
+  }
+
+  .pay-button {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .modal-content {
+    max-width: 95%;
+    padding: 20px;
   }
 }

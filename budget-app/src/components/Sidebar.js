@@ -13,17 +13,17 @@ export default function Sidebar() {
 
   return (
     <>
-      <nav className={`sidebar  ₹{isSidebarActive ? 'active' : ''}`}>
+      <nav className={`sidebar ${isSidebarActive ? 'active' : ''}`}>
         <div className="sidebar-header">
           <h3>Budget App</h3>
           <p>{currentUser?.email}</p>
         </div>
         <ul className="sidebar-menu">
-          <li><Link to="/dashboard/overview">Overview</Link></li>
-          <li><Link to="/dashboard/expenses">Expenses</Link></li>
-          <li><Link to="/dashboard/budgets">Budgets</Link></li>
-          <li><Link to="/dashboard/Debt">Debt</Link></li>
-          <li><Link to="/dashboard/profile">Profile</Link></li>
+          <li><Link to="/dashboard/overview" onClick={() => setIsSidebarActive(false)}>Overview</Link></li>
+          <li><Link to="/dashboard/expenses" onClick={() => setIsSidebarActive(false)}>Expenses</Link></li>
+          <li><Link to="/dashboard/budgets" onClick={() => setIsSidebarActive(false)}>Budgets</Link></li>
+          <li><Link to="/dashboard/debt" onClick={() => setIsSidebarActive(false)}>Debt</Link></li>
+          <li><Link to="/dashboard/profile" onClick={() => setIsSidebarActive(false)}>Profile</Link></li>
         </ul>
       </nav>
       <button className="sidebar-toggle" onClick={toggleSidebar}>
