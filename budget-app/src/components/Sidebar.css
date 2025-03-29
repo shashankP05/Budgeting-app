@@ -58,14 +58,32 @@
   position: fixed;
   top: 1rem;
   left: 1rem;
-  background: #4a90e2;
+  background: linear-gradient(135deg, #6a11cb, #2575fc); /* Gradient background */
   color: white;
   border: none;
-  padding: 0.8rem;
-  border-radius: 4px;
+  padding: 0.5rem;
+  border-radius: 50%; /* Circular shape */
+  width: 40px;
+  height: 40px;
   cursor: pointer;
-  font-size: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  transition: all 0.3s ease; /* Smooth transitions */
   z-index: 1001;
+}
+
+.sidebar-toggle:hover {
+  transform: scale(1.1); /* Slight scale on hover */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); /* Enhanced shadow */
+}
+
+.toggle-icon {
+  display: block;
+  transition: transform 0.3s ease; /* Smooth icon transition */
+}
+
+/* Rotate the close icon when active */
+.sidebar-toggle.active .toggle-icon {
+  transform: rotate(90deg);
 }
 
 @media (max-width: 768px) {
@@ -76,7 +94,9 @@
     transform: translateX(0);
   }
   .sidebar-toggle {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -90,6 +110,8 @@
     padding: 0.6rem 1rem;
   }
   .sidebar-toggle {
-    padding: 0.6rem;
+    width: 36px;
+    height: 36px;
+    padding: 0.4rem;
   }
 }

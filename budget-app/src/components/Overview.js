@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { Bar } from 'react-chartjs-2';
@@ -17,8 +17,40 @@ export default function Overview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // Default to current month
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  const chartRef = useRef(null);
 
   const { currency, loading: currencyLoading } = useUserCurrency(); // Fetch user's currency
+
+  // Handle window resize
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Trigger an initial resize event after component mounts
+    const resizeTimer = setTimeout(() => {
+      handleResize();
+      
+      // Force chart resize if it exists
+      if (chartRef.current && chartRef.current.chartInstance) {
+        chartRef.current.chartInstance.resize();
+      }
+    }, 100);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer);
+    };
+  }, []);
 
   // Format date for display
   const formatMonthYear = (dateString) => {
@@ -150,9 +182,19 @@ export default function Overview() {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false, // Allow the chart to adjust its size
     plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: 'Financial Summary' },
+      legend: { 
+        position: 'top',
+        display: windowSize.width > 480, // Hide legend on small mobile devices
+      },
+      title: { 
+        display: true, 
+        text: 'Financial Summary',
+        font: {
+          size: windowSize.width <= 480 ? 14 : 16
+        }
+      },
       tooltip: {
         callbacks: {
           label: function (context) {
@@ -171,8 +213,18 @@ export default function Overview() {
           callback: function (value) {
             return formatCurrency(value, currency);
           },
+          font: {
+            size: windowSize.width <= 480 ? 10 : 12
+          }
         },
       },
+      x: {
+        ticks: {
+          font: {
+            size: windowSize.width <= 480 ? 10 : 12
+          }
+        }
+      }
     },
   };
 
@@ -250,7 +302,14 @@ export default function Overview() {
             <div className="chart-due-dates-container">
               <div className="chart-container">
                 <h2>Financial Summary</h2>
-                <Bar data={barData} options={chartOptions} />
+                <div className="chart-wrapper">
+                  <Bar 
+                    ref={chartRef}
+                    data={barData} 
+                    options={chartOptions} 
+                    key={`chart-${windowSize.width}-${windowSize.height}`} // Force re-render on window resize
+                  />
+                </div>
               </div>
               <div className="upcoming-debts">
                 <h2>Upcoming Due Dates</h2>

@@ -5,7 +5,6 @@
   background: white;
   box-sizing: border-box;
 } */
-/* Uncomment if needed; assuming it’s applied in your JSX */
 
 h1 {
   font-size: 2rem;
@@ -98,6 +97,12 @@ h1 {
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   box-sizing: border-box;
   overflow: hidden; /* Prevent chart overflow */
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 300px; /* Fixed height for the chart */
+  width: 100%;
 }
 
 .chart-container h2 {
@@ -280,12 +285,15 @@ h1 {
     width: 100%; /* Full width on tablet */
     padding: 0.75rem;
   }
+  .chart-wrapper {
+    height: 250px; /* Smaller height for tablet */
+  }
   .projection-container {
     padding: 0.75rem;
     width: 100%; /* Full width */
   }
   .projection-grid {
-    grid-template-columns: 1fr; /* Single column */
+    grid-template-columns: repeat(2, 1fr); /* Two columns on tablet */
   }
 }
 
@@ -321,6 +329,9 @@ h1 {
   .chart-container, .upcoming-debts, .projection-container {
     padding: 0.5rem;
   }
+  .chart-wrapper {
+    height: 200px; /* Even smaller height for mobile */
+  }
   .projection-card {
     padding: 0.75rem;
   }
@@ -330,5 +341,8 @@ h1 {
   .debt-details {
     flex-direction: column; /* Stack details vertically */
     gap: 0.25rem;
+  }
+  .projection-grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
   }
 }

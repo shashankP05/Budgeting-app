@@ -191,7 +191,7 @@ const Profile = () => {
                 aria-required="true"
               />
             </div>
-            <div className="form-field">
+            <div className="form-field1">
               <label htmlFor="email">Email</label>
               <input
                 id="email"
