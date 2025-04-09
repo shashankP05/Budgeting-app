@@ -529,16 +529,17 @@ button[type="submit"]:hover {
 }
 
 .close-modal-button {
-  background: #ef4444;
+  background: #e90e0e;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 16px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   font-weight: 600;
   margin-top: 10px;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  margin-left: 10px;
 }
 
 .close-modal-button:hover {

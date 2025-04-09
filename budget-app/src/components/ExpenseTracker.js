@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { collection, addDoc, onSnapshot, query, where, doc, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import './ExpenseTracker.css';
@@ -7,12 +7,12 @@ import { formatCurrency } from '../utils/formatCurrency';
 
 export default function ExpenseTracker() {
   const [showForm, setShowForm] = useState(false);
-  const [formType, setFormType] = useState('expense'); // 'expense' or 'income'
-  const [expenses, setExpenses] = useState([]);
-  const [income, setIncome] = useState([]);
+  const [formType, setFormType] = useState('expense');
+  const [transactions, setTransactions] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [filter, setFilter] = useState('all'); // 'all', 'expense', 'income'
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
 
-  // Get user's currency preference
   const { currency } = useUserCurrency();
 
   // Form states
@@ -21,56 +21,61 @@ export default function ExpenseTracker() {
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
 
-  // Fetch expenses and income from Firestore
+  // Fetch transactions from Firestore
   useEffect(() => {
     if (!auth.currentUser) return;
 
-    // Fetch expenses
-    const qExpenses = query(
-      collection(db, 'expenses'),
-      where('userId', '==', auth.currentUser.uid)
-    );
-    const unsubscribeExpenses = onSnapshot(qExpenses, (snapshot) => {
-      const expensesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setExpenses(expensesData);
+    const collections = [
+      { name: 'expenses', type: 'expense' },
+      { name: 'income', type: 'income' },
+    ];
+
+    const unsubscribes = collections.map(({ name, type }) => {
+      const q = query(collection(db, name), where('userId', '==', auth.currentUser.uid));
+      return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          type,
+          ...doc.data(),
+        }));
+        setTransactions(prev => {
+          const otherTypeData = prev.filter(t => t.type !== type);
+          return [...otherTypeData, ...data];
+        });
+      }, (error) => console.error(`Error fetching ${name}:`, error));
     });
 
-    // Fetch income
-    const qIncome = query(
-      collection(db, 'income'),
-      where('userId', '==', auth.currentUser.uid)
-    );
-    const unsubscribeIncome = onSnapshot(qIncome, (snapshot) => {
-      const incomeData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setIncome(incomeData);
-    });
-
-    return () => {
-      unsubscribeExpenses();
-      unsubscribeIncome();
-    };
+    return () => unsubscribes.forEach(unsub => unsub());
   }, []);
+
+  // Sorted and filtered transactions
+  const filteredTransactions = useMemo(() => {
+    let result = transactions;
+    if (filter !== 'all') {
+      result = transactions.filter(t => t.type === filter);
+    }
+    return result.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+  }, [transactions, filter, sortOrder]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!auth.currentUser) {
-        throw new Error('User not authenticated');
-      }
+      if (!auth.currentUser) throw new Error('User not authenticated');
 
       const data = {
         amount: parseFloat(amount),
-        date: date || new Date().toISOString().split('T')[0], // Store as string (YYYY-MM-DD)
+        date: date || new Date().toISOString().split('T')[0],
         userId: auth.currentUser.uid,
         category,
         description,
       };
 
-      // Add to appropriate collection based on form type
-      const collectionName = formType === 'expense' ? 'expenses' : 'income';
-      await addDoc(collection(db, collectionName), data);
+      await addDoc(collection(db, formType === 'expense' ? 'expenses' : 'income'), data);
 
-      // Reset form
       setAmount('');
       setCategory('');
       setDate('');
@@ -81,23 +86,23 @@ export default function ExpenseTracker() {
     }
   };
 
-  // Function to delete an expense or income
   const handleDelete = async (id, type) => {
     try {
       await deleteDoc(doc(db, type === 'expense' ? 'expenses' : 'income', id));
-      setConfirmDelete(null); // Reset confirmation state
+      setConfirmDelete(null);
     } catch (error) {
       console.error('Error deleting:', error);
     }
   };
 
-  // Helper function to format date
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(); // Format as MM/DD/YYYY
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
-  // Show form with specified type
   const openForm = (type) => {
     setFormType(type);
     setShowForm(true);
@@ -105,76 +110,62 @@ export default function ExpenseTracker() {
 
   return (
     <div className="expense-tracker-container">
-      <header className="header">
-        <h1>Expense Tracker</h1>
-        <p>Manage your expenses and income efficiently</p>
-      </header>
+      {/* <header className="header">
+        <h1>Transaction History</h1>
+        <p>Track your financial past</p>
+      </header> */}
 
-      <div className="dashboard-layout">
-        {/* Left side - Expenses List */}
-        <div className="expenses-panel">
-          <h2>Your Expenses</h2>
-          {expenses.length === 0 ? (
-            <p className="no-expenses">No expenses added yet.</p>
-          ) : (
-            <div className="expenses-list">
-              {expenses.map((expense) => (
-                <div key={expense.id} className="expense-item">
-                  <div className="expense-info">
-                    <h3>{expense.category}</h3>
-                    <p>{expense.description}</p>
-                    <p className="expense-date">{formatDate(expense.date)}</p>
-                  </div>
-                  <div className="expense-actions">
-                    <div className="expense-amount">
-                      <p>-{formatCurrency(expense.amount, currency)}</p>
-                    </div>
-                    <button
-                      className="delete-button"
-                      onClick={() => setConfirmDelete({ id: expense.id, type: 'expense' })}
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+      <div className="controls">
+        <div className="filter-group">
+          <label htmlFor="filter">Filter:</label>
+          <select id="filter" value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option value="all">All</option>
+            <option value="expense">Expenses</option>
+            <option value="income">Income</option>
+          </select>
         </div>
-
-        {/* Right side - Income List */}
-        <div className="income-panel">
-          <h2>Your Income</h2>
-          {income.length === 0 ? (
-            <p className="no-income">No income added yet.</p>
-          ) : (
-            <div className="income-list">
-              {income.map((incomeItem) => (
-                <div key={incomeItem.id} className="income-item">
-                  <div className="income-info">
-                    <h3>{incomeItem.category}</h3>
-                    <p>{incomeItem.description}</p>
-                    <p className="income-date">{formatDate(incomeItem.date)}</p>
-                  </div>
-                  <div className="income-actions">
-                    <div className="income-amount">
-                      <p>+{formatCurrency(incomeItem.amount, currency)}</p>
-                    </div>
-                    <button
-                      className="delete-button"
-                      onClick={() => setConfirmDelete({ id: incomeItem.id, type: 'income' })}
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="sort-group">
+          <label htmlFor="sort">Sort by Date:</label>
+          <select id="sort" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
         </div>
       </div>
 
-      {/* Actions Menu */}
+      <div className="transactions-list">
+        {filteredTransactions.length === 0 ? (
+          <p className="no-transactions">No transactions found.</p>
+        ) : (
+          filteredTransactions.map((transaction) => (
+            <div
+              key={`${transaction.type}-${transaction.id}`}
+              className={`transaction-item ${transaction.type}`}
+              role="listitem"
+            >
+              <div className="transaction-info">
+                <h3>{transaction.category}</h3>
+                <p>{transaction.description || 'No description'}</p>
+                <p className="transaction-date">{formatDate(transaction.date)}</p>
+              </div>
+              <div className="transaction-actions">
+                <p className="transaction-amount">
+                  {transaction.type === 'expense' ? '-' : '+'}
+                  {formatCurrency(transaction.amount, currency)}
+                </p>
+                <button
+                  className="delete-button"
+                  onClick={() => setConfirmDelete({ id: transaction.id, type: transaction.type })}
+                  aria-label={`Delete ${transaction.type}`}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       <div className="actions-menu">
         <button className="add-button income-button" onClick={() => openForm('income')}>
           <span className="button-icon">+</span>
@@ -186,15 +177,15 @@ export default function ExpenseTracker() {
         </button>
       </div>
 
-      {/* Modal Overlay for Adding Expense/Income */}
       {showForm && (
-        <div className="modal-overlay">
+        <div className="modal-overlay" role="dialog" aria-labelledby="form-title">
           <div className="modal-content">
-            <h3>Add {formType === 'expense' ? 'Expense' : 'Income'}</h3>
+            <h3 id="form-title">Add {formType === 'expense' ? 'Expense' : 'Income'}</h3>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Amount ({currency})</label>
+                <label htmlFor="amount">Amount ({currency})</label>
                 <input
+                  id="amount"
                   type="number"
                   step="0.01"
                   placeholder="Amount"
@@ -203,42 +194,41 @@ export default function ExpenseTracker() {
                   required
                 />
               </div>
-
               <div className="form-group">
-                <label>Category</label>
+                <label htmlFor="category">{formType === 'expense' ? 'Category' : 'Source'}</label>
                 <input
+                  id="category"
                   type="text"
-                  placeholder={formType === 'expense' ? "Category" : "Source"}
+                  placeholder={formType === 'expense' ? 'Category' : 'Source'}
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   required
                 />
               </div>
-
               <div className="form-group">
-                <label>Description</label>
+                <label htmlFor="description">Description</label>
                 <input
+                  id="description"
                   type="text"
                   placeholder="Description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
-
               <div className="form-group">
-                <label>Date</label>
+                <label htmlFor="date">Date</label>
                 <input
+                  id="date"
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                 />
               </div>
-
               <div className="form-actions">
                 <button type="button" className="cancel-button" onClick={() => setShowForm(false)}>
                   Cancel
                 </button>
-                <button type="submit" className={formType === 'expense' ? "submit-button" : "income-submit-button"}>
+                <button type="submit" className={formType === 'expense' ? 'submit-button' : 'income-submit-button'}>
                   Add {formType === 'expense' ? 'Expense' : 'Income'}
                 </button>
               </div>
@@ -247,17 +237,13 @@ export default function ExpenseTracker() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {confirmDelete && (
-        <div className="modal-overlay">
+        <div className="modal-overlay" role="dialog" aria-labelledby="delete-title">
           <div className="modal-content delete-confirmation">
-            <h3>Confirm Delete</h3>
+            <h3 id="delete-title">Confirm Delete</h3>
             <p>Are you sure you want to delete this {confirmDelete.type}?</p>
             <div className="form-actions">
-              <button
-                className="cancel-button"
-                onClick={() => setConfirmDelete(null)}
-              >
+              <button className="cancel-button" onClick={() => setConfirmDelete(null)}>
                 Cancel
               </button>
               <button

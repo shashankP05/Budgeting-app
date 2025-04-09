@@ -137,7 +137,7 @@ progress.over-budget::-moz-progress-bar {
   margin-top: 0.5rem;
 }
 
-/* Remaining Budget */
+
 .remaining-budget {
   color: #27ae60;
   font-size: 0.9rem;
@@ -145,14 +145,13 @@ progress.over-budget::-moz-progress-bar {
   margin-top: 0.5rem;
 }
 
-/* Progress Text */
+
 .progress-text {
   color: #7f8c8d;
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
 
-/* Delete Button */
 .delete-button {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
@@ -176,19 +175,27 @@ progress.over-budget::-moz-progress-bar {
 .delete-button:active {
   transform: translateY(0);
 }
+.form-inputs {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-bottom: 1rem;
+}
 
-/* Responsive Design */
+
+
 @media (max-width: 1440px) {
   .budget-goals {
-    max-width: 1100px; /* Adjusted for smaller laptops */
+    max-width: 1100px;
   }
 }
 
 @media (max-width: 1024px) {
   .budget-goals {
-    margin-left: 0; /* Remove sidebar margin on smaller screens */
+    margin-left: 0; 
     padding: 1.5rem;
-    max-width: 800px; /* Adjusted for tablets */
+    max-width: 800px; 
   }
 
   .budget-form {
@@ -207,7 +214,7 @@ progress.over-budget::-moz-progress-bar {
 @media (max-width: 768px) {
   .budget-goals {
     padding: 1rem;
-    max-width: 600px; /* Adjusted for smaller tablets */
+    max-width: 600px; 
   }
 
   .budget-item {
@@ -224,7 +231,7 @@ progress.over-budget::-moz-progress-bar {
 }
 @media (max-width: 480px) {
   .budget-form button {
-    padding: 0.6rem 1rem; /* Smaller for mobile */
+    padding: 0.6rem 1rem;
   }
 
   .delete-button {
@@ -235,7 +242,7 @@ progress.over-budget::-moz-progress-bar {
 @media (max-width: 480px) {
   .budget-goals {
     padding: 1rem;
-    max-width: 100%; /* Full width for mobile */
+    max-width: 100%;
   }
 
   .budget-form input {

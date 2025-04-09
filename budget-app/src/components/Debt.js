@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { useUserCurrency } from '../hooks/useUserCurrency'; // Custom hook to fetch currency
-import { formatCurrency } from '../utils/formatCurrency'; // Utility to format monetary values
+import { useUserCurrency } from '../hooks/useUserCurrency'; 
+import { formatCurrency } from '../utils/formatCurrency'; 
 import './Debt.css';
 
 export default function Debt() {
@@ -25,7 +25,7 @@ export default function Debt() {
   const [successMessage, setSuccessMessage] = useState('');
   const [showAddDebtModal, setShowAddDebtModal] = useState(false);
 
-  const { currency, loading: currencyLoading } = useUserCurrency(); // Fetch user's currency
+  const { currency, loading: currencyLoading } = useUserCurrency(); 
 
   useEffect(() => {
     if (!auth.currentUser) {
@@ -51,7 +51,7 @@ export default function Debt() {
     return () => unsubscribe();
   }, []);
 
-  // Wait for currency to load
+  
   if (currencyLoading) {
     return <div>Loading currency...</div>;
   }
@@ -194,7 +194,7 @@ export default function Debt() {
 
   return (
     <div className="debt-container">
-      <h1>Debt Management Dashboard</h1>
+      <h1>Debt Management</h1>
       {loading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>

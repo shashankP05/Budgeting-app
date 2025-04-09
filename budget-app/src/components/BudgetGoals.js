@@ -58,24 +58,26 @@ export default function BudgetGoals() {
     <div className="budget-goals">
       <h2>Budget Management</h2>
       <form onSubmit={addBudget} className="budget-form">
-        <input
-          type="text"
-          placeholder="Category"
-          value={newBudget.category}
-          onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
-          required
-        />
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Budget Limit"
-          value={newBudget.limit}
-          onChange={(e) => setNewBudget({ ...newBudget, limit: e.target.value })}
-          required
-        />
+        <div className="form-inputs">
+          <input
+            type="text"
+            placeholder="Category"
+            value={newBudget.category}
+            onChange={(e) => setNewBudget({ ...newBudget, category: e.target.value })}
+            required
+          />
+          <input
+            type="number"
+            step="0.01"
+            placeholder="Budget Limit"
+            value={newBudget.limit}
+            onChange={(e) => setNewBudget({ ...newBudget, limit: e.target.value })}
+            required
+          />
+        </div>
         <button type="submit">Add Budget</button>
       </form>
-      
+
       <div className="budget-list">
         {budgets.map(budget => {
           const spent = expenses
