@@ -1,10 +1,4 @@
-/* .overview-container {
-  padding: 2rem;
-  max-width: 1350px;
-  margin: 0 auto;
-  background: white;
-  box-sizing: border-box;
-} */
+
 
 h1 {
   font-size: 2rem;
@@ -68,8 +62,8 @@ h1 {
   font-weight: bold;
 }
 
-.expense-amount { color: #ff6384; }
-.income-amount { color: #36a2eb; }
+.expense-amount { color: #ff0b0b; }
+.income-amount { color: #27ae60; }
 .positive-amount { color: #27ae60; }
 .negative-amount { color: #ff0b0b; }
 .debt-amount { color: #ff0b0b; }

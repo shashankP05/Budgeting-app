@@ -153,11 +153,7 @@ const Profile = () => {
 
   return (
     <div className="profile-page" role="main">
-      {/* <header className="profile-header" aria-label="Profile header">
-        <h1>Profile</h1>
-        <p className="subtitle">Manage your personal information</p>
-      </header> */}
-
+    
       <section className="profile-card" aria-label="Profile details">
         <div
           className="avatar-placeholder"
